@@ -4,7 +4,11 @@
 
 ## Canlı Demo
 
-🌐 **[fikirpcimnastigim](https://security-master.github.io/fikirpcimnastigim/)**
+🌐 **https://barbie-drag-buck-readily.trycloudflare.com**
+
+Alternatif:
+- Netlify: http://cheery-selkie-abce42.netlify.app (şifre: `My-Drop-Site`)
+- GitHub Pages (repo ayarlarından `gh-pages` branch seçilince): https://security-master.github.io/fikirpcimnastigim/
 
 ## Özellikler
 
