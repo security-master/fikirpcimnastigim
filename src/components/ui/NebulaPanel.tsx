@@ -1,66 +1,200 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useIdeaStore } from '../../store/ideaStore'
-import { playAddIdea } from '../../hooks/useSound'
-import { STARTER_IDEAS } from '../../data/content'
+import { playAddIdea, playSelect } from '../../hooks/useSound'
+import {
+  THEMES,
+  MOODS,
+  MEDIUMS,
+  TWISTS,
+  composeIdea,
+} from '../../data/content'
+import { OptionChip } from './OptionChip'
+
+type Step = 'theme' | 'mood' | 'medium' | 'twist' | 'result'
+
+const STEPS: Step[] = ['theme', 'mood', 'medium', 'twist', 'result']
 
 export function NebulaPanel() {
-  const [input, setInput] = useState('')
+  const [step, setStep] = useState<Step>('theme')
+  const [themeId, setThemeId] = useState<string | null>(null)
+  const [moodId, setMoodId] = useState<string | null>(null)
+  const [mediumId, setMediumId] = useState<string | null>(null)
+  const [twistId, setTwistId] = useState<string | null>(null)
+  const [result, setResult] = useState<{ title: string; description: string } | null>(null)
+
   const addIdea = useIdeaStore((s) => s.addIdea)
   const ideas = useIdeaStore((s) => s.ideas)
   const selectedId = useIdeaStore((s) => s.selectedId)
   const selected = ideas.find((i) => i.id === selectedId)
   const removeIdea = useIdeaStore((s) => s.removeIdea)
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim()) return
-    addIdea(input)
+  const stepIndex = STEPS.indexOf(step)
+
+  const reset = () => {
+    setStep('theme')
+    setThemeId(null)
+    setMoodId(null)
+    setMediumId(null)
+    setTwistId(null)
+    setResult(null)
+  }
+
+  const finish = (twist: string) => {
+    setTwistId(twist)
+    const composed = composeIdea(
+      themeId as never,
+      moodId as never,
+      mediumId as never,
+      twist as never,
+    )
+    setResult(composed)
+    setStep('result')
     playAddIdea()
-    setInput('')
+  }
+
+  const save = () => {
+    if (!result) return
+    addIdea(result.title, ['nebula', themeId ?? '', moodId ?? ''])
+    playAddIdea()
   }
 
   return (
     <div className="space-y-4">
       <div>
         <h3 className="font-display text-lg font-semibold text-white">Fikir Nebulası</h3>
-        <p className="text-sm text-white/50">Bir fikir yaz, evrende yıldız olarak doğsun</p>
+        <p className="text-sm text-white/50">Seçenekleri seç — fikir kendiliğinden doğsun</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Fikrini yaz..."
-          className="flex-1 rounded-xl bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none ring-1 ring-white/10 focus:ring-neon-cyan/50 transition-all"
-          maxLength={120}
-        />
-        <motion.button
-          type="submit"
-          whileTap={{ scale: 0.95 }}
-          className="rounded-xl px-5 py-3 text-sm font-semibold text-void"
-          style={{ background: 'linear-gradient(135deg, #00f5ff, #bf00ff)' }}
-        >
-          Ekle
-        </motion.button>
-      </form>
+      <div className="flex gap-1.5">
+        {['Tema', 'Ruh Hali', 'Form', 'Büküm'].map((label, i) => (
+          <div
+            key={label}
+            className={`h-1 flex-1 rounded-full transition-colors ${
+              i < stepIndex ? 'bg-neon-cyan' : i === stepIndex && step !== 'result' ? 'bg-neon-cyan/50' : 'bg-white/10'
+            }`}
+          />
+        ))}
+      </div>
 
-      {ideas.length === 0 && (
-        <div className="space-y-2">
-          <p className="text-xs text-white/30">Başlamak için dene:</p>
-          <div className="flex flex-wrap gap-2">
-            {STARTER_IDEAS.map((idea) => (
-              <button
-                key={idea}
-                onClick={() => { addIdea(idea); playAddIdea() }}
-                className="glass rounded-lg px-3 py-1.5 text-xs text-white/60 hover:text-white hover:bg-white/10 transition-all"
+      <AnimatePresence mode="wait">
+        {step === 'theme' && (
+          <motion.div key="theme" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} className="space-y-3">
+            <p className="text-xs text-white/40">1. Temanı seç</p>
+            <div className="grid grid-cols-2 gap-2">
+              {THEMES.map((t) => (
+                <OptionChip
+                  key={t.id}
+                  icon={t.icon}
+                  label={t.label}
+                  selected={themeId === t.id}
+                  onClick={() => {
+                    setThemeId(t.id)
+                    playSelect()
+                    setStep('mood')
+                  }}
+                />
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {step === 'mood' && (
+          <motion.div key="mood" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} className="space-y-3">
+            <p className="text-xs text-white/40">2. Ruh halini seç</p>
+            <div className="grid grid-cols-2 gap-2">
+              {MOODS.map((m) => (
+                <OptionChip
+                  key={m.id}
+                  icon={m.icon}
+                  label={m.label}
+                  accent="#ff00aa"
+                  selected={moodId === m.id}
+                  onClick={() => {
+                    setMoodId(m.id)
+                    playSelect()
+                    setStep('medium')
+                  }}
+                />
+              ))}
+            </div>
+            <button onClick={() => setStep('theme')} className="text-xs text-white/30 hover:text-white/60">← Geri</button>
+          </motion.div>
+        )}
+
+        {step === 'medium' && (
+          <motion.div key="medium" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} className="space-y-3">
+            <p className="text-xs text-white/40">3. Formunu seç</p>
+            <div className="grid grid-cols-2 gap-2">
+              {MEDIUMS.map((m) => (
+                <OptionChip
+                  key={m.id}
+                  icon={m.icon}
+                  label={m.label}
+                  accent="#ffd700"
+                  selected={mediumId === m.id}
+                  onClick={() => {
+                    setMediumId(m.id)
+                    playSelect()
+                    setStep('twist')
+                  }}
+                />
+              ))}
+            </div>
+            <button onClick={() => setStep('mood')} className="text-xs text-white/30 hover:text-white/60">← Geri</button>
+          </motion.div>
+        )}
+
+        {step === 'twist' && (
+          <motion.div key="twist" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} className="space-y-3">
+            <p className="text-xs text-white/40">4. Bükümü seç — fikir üretilecek</p>
+            <div className="grid grid-cols-2 gap-2">
+              {TWISTS.map((t) => (
+                <OptionChip
+                  key={t.id}
+                  icon={t.icon}
+                  label={t.label}
+                  accent="#bf00ff"
+                  selected={twistId === t.id}
+                  onClick={() => finish(t.id)}
+                />
+              ))}
+            </div>
+            <button onClick={() => setStep('medium')} className="text-xs text-white/30 hover:text-white/60">← Geri</button>
+          </motion.div>
+        )}
+
+        {step === 'result' && result && (
+          <motion.div
+            key="result"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="space-y-3"
+          >
+            <div className="glass rounded-xl p-4 border border-neon-cyan/25">
+              <p className="text-xs text-neon-cyan mb-2">Üretilen fikir</p>
+              <p className="font-display text-base font-semibold text-white leading-snug">{result.title}</p>
+              <p className="mt-2 text-xs text-white/50 leading-relaxed">{result.description}</p>
+            </div>
+            <div className="flex gap-2">
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={save}
+                className="flex-1 rounded-xl py-3 text-sm font-semibold text-void"
+                style={{ background: 'linear-gradient(135deg, #00f5ff, #bf00ff)' }}
               >
-                {idea}
+                Evrene Ekle
+              </motion.button>
+              <button
+                onClick={reset}
+                className="rounded-xl px-4 py-3 text-sm text-white/60 glass hover:text-white"
+              >
+                Yeniden
               </button>
-            ))}
-          </div>
-        </div>
-      )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {selected && (
         <motion.div

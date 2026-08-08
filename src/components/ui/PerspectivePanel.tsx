@@ -1,65 +1,83 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { PERSPECTIVES } from '../../data/content'
+import { PERSPECTIVES, SEED_IDEAS } from '../../data/content'
 import { useIdeaStore } from '../../store/ideaStore'
+import { playSelect } from '../../hooks/useSound'
+import { OptionChip } from './OptionChip'
 
 export function PerspectivePanel() {
   const ideas = useIdeaStore((s) => s.ideas)
   const selectedId = useIdeaStore((s) => s.selectedId)
-  const [customIdea, setCustomIdea] = useState('')
+  const [seed, setSeed] = useState<string | null>(null)
   const [activePerspective, setActivePerspective] = useState<string | null>(null)
 
-  const ideaText = selectedId
-    ? ideas.find((i) => i.id === selectedId)?.text ?? ''
-    : customIdea
+  const nebulaIdea = selectedId
+    ? ideas.find((i) => i.id === selectedId)?.text ?? null
+    : null
 
+  const ideaText = seed ?? nebulaIdea ?? ''
   const active = PERSPECTIVES.find((p) => p.id === activePerspective)
+  const seeds = nebulaIdea
+    ? [nebulaIdea, ...SEED_IDEAS.filter((s) => s !== nebulaIdea)].slice(0, 8)
+    : SEED_IDEAS
 
   return (
     <div className="space-y-4">
       <div>
         <h3 className="font-display text-lg font-semibold text-white">🔮 Perspektif Portalı</h3>
-        <p className="text-sm text-white/50">Aynı fikri 6 farklı gözle gör</p>
+        <p className="text-sm text-white/50">Fikir seç → bakış açısı seç → sonuç gör</p>
       </div>
 
-      {!selectedId && (
-        <input
-          value={customIdea}
-          onChange={(e) => setCustomIdea(e.target.value)}
-          placeholder="Bir fikir yaz veya nebuladan seç..."
-          className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none ring-1 ring-white/10 focus:ring-neon-violet/50"
-        />
-      )}
-
-      {selectedId && (
-        <div className="glass rounded-xl px-4 py-2 text-sm text-white/70">
-          Seçili: {ideaText}
+      <div className="space-y-2">
+        <p className="text-xs text-white/40">1. Fikrini seç</p>
+        <div className="grid grid-cols-1 gap-2">
+          {seeds.map((s) => (
+            <OptionChip
+              key={s}
+              label={s}
+              size="sm"
+              accent="#bf00ff"
+              selected={ideaText === s}
+              onClick={() => {
+                setSeed(s)
+                setActivePerspective(null)
+                playSelect()
+              }}
+            />
+          ))}
         </div>
-      )}
+      </div>
 
-      <div className="grid grid-cols-3 gap-2">
-        {PERSPECTIVES.map((p) => (
-          <motion.button
-            key={p.id}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setActivePerspective(p.id)}
-            disabled={!ideaText}
-            className="glass rounded-xl p-3 text-center transition-all disabled:opacity-30"
-            style={{
-              borderColor: activePerspective === p.id ? p.color : undefined,
-              borderWidth: activePerspective === p.id ? 1 : undefined,
-            }}
-          >
-            <span className="text-2xl">{p.emoji}</span>
-            <p className="mt-1 text-xs text-white/60">{p.name}</p>
-          </motion.button>
-        ))}
+      <div className="space-y-2">
+        <p className="text-xs text-white/40">2. Bakış açısını seç</p>
+        <div className="grid grid-cols-3 gap-2">
+          {PERSPECTIVES.map((p) => (
+            <motion.button
+              key={p.id}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                setActivePerspective(p.id)
+                playSelect()
+              }}
+              disabled={!ideaText}
+              className="glass rounded-xl p-3 text-center transition-all disabled:opacity-30"
+              style={{
+                borderColor: activePerspective === p.id ? p.color : 'transparent',
+                borderWidth: 1,
+                background: activePerspective === p.id ? `${p.color}18` : undefined,
+              }}
+            >
+              <span className="text-2xl">{p.emoji}</span>
+              <p className="mt-1 text-xs text-white/60">{p.name}</p>
+            </motion.button>
+          ))}
+        </div>
       </div>
 
       {active && ideaText && (
         <motion.div
-          key={active.id}
+          key={`${active.id}-${ideaText}`}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           className="glass rounded-xl p-4"

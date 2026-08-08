@@ -1,30 +1,29 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CONCEPTS, STORM_TEMPLATES } from '../../data/content'
+import { CONCEPTS, STORM_TEMPLATES, pickN, pickOne } from '../../data/content'
 import { useIdeaStore } from '../../store/ideaStore'
-import { playStorm } from '../../hooks/useSound'
-
-function pick<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)]
-}
+import { playStorm, playSelect } from '../../hooks/useSound'
+import { OptionChip } from './OptionChip'
 
 export function StormPanel() {
-  const [conceptA, setConceptA] = useState('')
-  const [conceptB, setConceptB] = useState('')
+  const [poolKey, setPoolKey] = useState(0)
+  const poolA = useMemo(() => pickN(CONCEPTS, 8), [poolKey])
+  const poolB = useMemo(() => pickN(CONCEPTS.filter((c) => !poolA.includes(c)), 8), [poolKey, poolA])
+
+  const [conceptA, setConceptA] = useState<string | null>(null)
+  const [conceptB, setConceptB] = useState<string | null>(null)
   const [result, setResult] = useState('')
   const [isStriking, setIsStriking] = useState(false)
+
   const addIdea = useIdeaStore((s) => s.addIdea)
   const setStormResult = useIdeaStore((s) => s.setStormResult)
 
   const strike = () => {
+    if (!conceptA || !conceptB) return
     setIsStriking(true)
     playStorm()
-    const a = conceptA || pick(CONCEPTS)
-    const b = conceptB || pick(CONCEPTS)
-    setConceptA(a)
-    setConceptB(b)
-    const template = pick(STORM_TEMPLATES)
-    const collision = template(a, b)
+    const template = pickOne(STORM_TEMPLATES)
+    const collision = template(conceptA, conceptB)
     setTimeout(() => {
       setResult(collision)
       setStormResult(collision)
@@ -32,46 +31,87 @@ export function StormPanel() {
     }, 600)
   }
 
-  const saveCollision = () => {
-    if (result) {
-      addIdea(result, ['storm'])
-    }
+  const reshuffle = () => {
+    setPoolKey((k) => k + 1)
+    setConceptA(null)
+    setConceptB(null)
+    setResult('')
+    playSelect()
   }
 
   return (
     <div className="space-y-4">
-      <div>
-        <h3 className="font-display text-lg font-semibold text-white">⚡ Sinaptik Fırtına</h3>
-        <p className="text-sm text-white/50">İki kavramı çarpıştır, yeni bir fikir doğsun</p>
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <h3 className="font-display text-lg font-semibold text-white">⚡ Sinaptik Fırtına</h3>
+          <p className="text-sm text-white/50">İki kavram seç, çarpıştır</p>
+        </div>
+        <button onClick={reshuffle} className="text-xs text-white/40 hover:text-neon-cyan transition-colors">
+          Yenile
+        </button>
       </div>
 
-      <div className="flex items-center gap-3">
-        <input
-          value={conceptA}
-          onChange={(e) => setConceptA(e.target.value)}
-          placeholder="Kavram 1"
-          className="flex-1 rounded-xl bg-white/5 px-3 py-2.5 text-sm text-white placeholder-white/30 outline-none ring-1 ring-white/10 focus:ring-neon-magenta/50"
-        />
+      <div className="space-y-2">
+        <p className="text-xs text-white/40">Sol kavram</p>
+        <div className="flex flex-wrap gap-2">
+          {poolA.map((c) => (
+            <OptionChip
+              key={`a-${c}`}
+              label={c}
+              size="sm"
+              accent="#ff00aa"
+              selected={conceptA === c}
+              onClick={() => {
+                setConceptA(c)
+                playSelect()
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="flex justify-center">
         <motion.span
           animate={isStriking ? { scale: [1, 2, 1], rotate: [0, 180, 360] } : {}}
           className="text-2xl"
         >
           ⚡
         </motion.span>
-        <input
-          value={conceptB}
-          onChange={(e) => setConceptB(e.target.value)}
-          placeholder="Kavram 2"
-          className="flex-1 rounded-xl bg-white/5 px-3 py-2.5 text-sm text-white placeholder-white/30 outline-none ring-1 ring-white/10 focus:ring-neon-magenta/50"
-        />
       </div>
+
+      <div className="space-y-2">
+        <p className="text-xs text-white/40">Sağ kavram</p>
+        <div className="flex flex-wrap gap-2">
+          {poolB.map((c) => (
+            <OptionChip
+              key={`b-${c}`}
+              label={c}
+              size="sm"
+              accent="#00f5ff"
+              selected={conceptB === c}
+              onClick={() => {
+                setConceptB(c)
+                playSelect()
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {(conceptA || conceptB) && (
+        <p className="text-center text-sm text-white/60">
+          <span className="text-neon-magenta">{conceptA ?? '…'}</span>
+          {' × '}
+          <span className="text-neon-cyan">{conceptB ?? '…'}</span>
+        </p>
+      )}
 
       <motion.button
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onClick={strike}
-        disabled={isStriking}
-        className="w-full rounded-xl py-3 font-semibold text-white glow-magenta disabled:opacity-50"
+        disabled={!conceptA || !conceptB || isStriking}
+        className="w-full rounded-xl py-3 font-semibold text-white glow-magenta disabled:opacity-40"
         style={{ background: 'linear-gradient(135deg, rgba(255,0,170,0.3), rgba(191,0,255,0.3))', border: '1px solid rgba(255,0,170,0.3)' }}
       >
         {isStriking ? 'Çarpışıyor...' : 'Fırtınayı Başlat'}
@@ -86,12 +126,23 @@ export function StormPanel() {
             className="glass rounded-xl p-4 border border-neon-magenta/20"
           >
             <p className="text-sm text-white/80 leading-relaxed">{result}</p>
-            <button
-              onClick={saveCollision}
-              className="mt-3 text-xs text-neon-cyan hover:underline"
-            >
-              → Evrene kaydet
-            </button>
+            <div className="mt-3 flex gap-3">
+              <button
+                onClick={() => addIdea(result, ['storm'])}
+                className="text-xs text-neon-cyan hover:underline"
+              >
+                → Evrene kaydet
+              </button>
+              <button
+                onClick={() => {
+                  setResult('')
+                  strike()
+                }}
+                className="text-xs text-white/40 hover:text-white/70"
+              >
+                Tekrar çarpıştır
+              </button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

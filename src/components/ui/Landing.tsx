@@ -33,9 +33,9 @@ export function Landing({ onStart }: LandingProps) {
         transition={{ delay: 0.5, duration: 0.8 }}
         className="mb-4 max-w-lg text-lg text-white/60 md:text-xl"
       >
-        Zihninin sınırlarını aş. Fikirlerini 3D evrende gör.
+        Seçenekleri seç — fikirler kendiliğinden doğsun.
         <br />
-        Yaratıcı zekanı keşfet.
+        3D evrende yaratıcı zekanı keşfet.
       </motion.p>
 
       <motion.div

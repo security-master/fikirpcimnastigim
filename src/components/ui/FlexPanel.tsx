@@ -1,29 +1,33 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { FLEX_PROMPTS } from '../../data/content'
+import { FLEX_ROUNDS, pickN } from '../../data/content'
 import { useIdeaStore } from '../../store/ideaStore'
-import { playAddIdea, playTick, playSuccess } from '../../hooks/useSound'
+import { playAddIdea, playTick, playSuccess, playSelect } from '../../hooks/useSound'
+import { OptionChip } from './OptionChip'
 
-const DURATION = 60
-
-function pick<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)]
-}
+const DURATION = 45
 
 export function FlexPanel() {
-  const [prompt, setPrompt] = useState(pick(FLEX_PROMPTS))
   const [timeLeft, setTimeLeft] = useState(DURATION)
-  const [input, setInput] = useState('')
   const [running, setRunning] = useState(false)
+  const [roundIndex, setRoundIndex] = useState(0)
+  const [picked, setPicked] = useState<string[]>([])
+  const [shuffleKey, setShuffleKey] = useState(0)
+
   const flexScore = useIdeaStore((s) => s.flexScore)
   const addIdea = useIdeaStore((s) => s.addIdea)
   const resetFlexScore = useIdeaStore((s) => s.resetFlexScore)
   const incrementFlexScore = useIdeaStore((s) => s.incrementFlexScore)
 
+  const rounds = useMemo(() => pickN(FLEX_ROUNDS, FLEX_ROUNDS.length), [shuffleKey])
+  const current = rounds[roundIndex % rounds.length]
+
   const start = () => {
     resetFlexScore()
     setTimeLeft(DURATION)
-    setPrompt(pick(FLEX_PROMPTS))
+    setRoundIndex(0)
+    setPicked([])
+    setShuffleKey((k) => k + 1)
     setRunning(true)
   }
 
@@ -34,7 +38,10 @@ export function FlexPanel() {
 
   useEffect(() => {
     if (!running) return
-    if (timeLeft <= 0) { finish(); return }
+    if (timeLeft <= 0) {
+      finish()
+      return
+    }
     const timer = setTimeout(() => {
       if (timeLeft <= 5) playTick()
       setTimeLeft((t) => t - 1)
@@ -42,13 +49,14 @@ export function FlexPanel() {
     return () => clearTimeout(timer)
   }, [running, timeLeft, finish])
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim() || !running) return
-    addIdea(input, ['flex'])
-    incrementFlexScore()
+  const choose = (option: string) => {
+    if (!running) return
+    playSelect()
     playAddIdea()
-    setInput('')
+    addIdea(`${current.prompt} → ${option}`, ['flex'])
+    incrementFlexScore()
+    setPicked((p) => [...p, option])
+    setRoundIndex((i) => i + 1)
   }
 
   const progress = ((DURATION - timeLeft) / DURATION) * 100
@@ -57,7 +65,7 @@ export function FlexPanel() {
     <div className="space-y-4">
       <div>
         <h3 className="font-display text-lg font-semibold text-white">🏋️ Zihin Esnekliği</h3>
-        <p className="text-sm text-white/50">60 saniyede ne kadar fikir üretebilirsin?</p>
+        <p className="text-sm text-white/50">45 saniyede seçenekleri yakala</p>
       </div>
 
       {!running && timeLeft === DURATION && (
@@ -72,7 +80,7 @@ export function FlexPanel() {
         </motion.button>
       )}
 
-      {running && (
+      {running && current && (
         <>
           <div className="relative h-2 rounded-full bg-white/10 overflow-hidden">
             <motion.div
@@ -83,28 +91,23 @@ export function FlexPanel() {
 
           <div className="flex items-center justify-between">
             <span className="font-display text-3xl font-bold text-neon-gold">{timeLeft}s</span>
-            <span className="text-sm text-white/50">{flexScore} fikir</span>
+            <span className="text-sm text-white/50">{flexScore} seçim</span>
           </div>
 
           <div className="glass rounded-xl p-4">
-            <p className="text-sm font-medium text-white/90">{prompt}</p>
+            <p className="text-sm font-medium text-white/90">{current.prompt}</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex gap-2">
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Hızlıca yaz..."
-              className="flex-1 rounded-xl bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none ring-1 ring-white/10 focus:ring-neon-gold/50"
-              autoFocus
-            />
-            <button
-              type="submit"
-              className="rounded-xl px-4 py-3 text-sm font-semibold bg-neon-gold/20 text-neon-gold ring-1 ring-neon-gold/30"
-            >
-              →
-            </button>
-          </form>
+          <div className="grid grid-cols-1 gap-2">
+            {current.options.map((option) => (
+              <OptionChip
+                key={`${roundIndex}-${option}`}
+                label={option}
+                accent="#ffd700"
+                onClick={() => choose(option)}
+              />
+            ))}
+          </div>
         </>
       )}
 
@@ -112,14 +115,21 @@ export function FlexPanel() {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="glass rounded-xl p-6 text-center"
+          className="glass rounded-xl p-6 text-center space-y-3"
         >
-          <p className="text-4xl mb-2">🎉</p>
-          <p className="font-display text-2xl font-bold text-gradient">{flexScore} Fikir!</p>
-          <p className="mt-2 text-sm text-white/50">
-            {flexScore >= 10 ? 'Efsanevi zihin!' : flexScore >= 5 ? 'Harika performans!' : 'Güzel başlangıç!'}
+          <p className="text-4xl">🎉</p>
+          <p className="font-display text-2xl font-bold text-gradient">{flexScore} Seçim!</p>
+          <p className="text-sm text-white/50">
+            {flexScore >= 10 ? 'Efsanevi zihin!' : flexScore >= 5 ? 'Harika refleks!' : 'Güzel başlangıç!'}
           </p>
-          <button onClick={start} className="mt-4 text-sm text-neon-cyan hover:underline">
+          {picked.length > 0 && (
+            <div className="text-left space-y-1 max-h-28 overflow-y-auto">
+              {picked.slice(-5).map((p, i) => (
+                <p key={i} className="text-xs text-white/40 truncate">• {p}</p>
+              ))}
+            </div>
+          )}
+          <button onClick={start} className="text-sm text-neon-cyan hover:underline">
             Tekrar dene
           </button>
         </motion.div>
