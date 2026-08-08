@@ -1,20 +1,19 @@
-# Fikir Jimnastiği
+# Fikir Jimnastiği — Irmağa Bırak
 
-**5 dakikalık yaratıcı antrenman.** Takıldığında seçenekleri seç — üç istasyonda kullanabileceğin fikirler üretilsin.
+Akan kelimeleri yakala. Beş tanesi birikince girdap döner — kıyıya üç fikir şişesi vurur.
 
 ## Canlı
 
 🌐 https://barbie-drag-buck-readily.trycloudflare.com
 
-## Nasıl çalışır?
+## Deneyim
 
-1. **Antrenman seç** — Kıvılcım, İçerik, Tıkanıklık Açıcı veya Fikir Tornası  
-2. **Isın** — 4 seçimle zihnini aç  
-3. **Çarpıştır** — iki kavramı birleştir  
-4. **Şekil ver** — fikri bük ve güçlendir  
-5. **Özet** — kopyala veya `.txt` indir  
+1. **Kıyı** — “Suya gir”
+2. **Sürükleniş** — Ekranda akan kelimelere dokun, ağına düşür
+3. **Girdap** — Yakalananlar karışır
+4. **Şişeler** — Üç fikir kıyıya vurur; tut, kopyala
 
-Yazmana gerek yok. Her şey seçeneklerle ilerler.
+Yazma yok. Form yok. Sadece yakala.
 
 ## Geliştirme
 
@@ -22,13 +21,3 @@ Yazmana gerek yok. Her şey seçeneklerle ilerler.
 npm install
 npm run dev
 ```
-
-## Build
-
-```bash
-npm run build
-```
-
----
-
-React · Vite · Tailwind · Framer Motion
