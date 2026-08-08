@@ -1,46 +1,39 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { useIdeaStore } from './store/ideaStore'
-import { Landing } from './components/ui/Landing'
-import { Experience } from './components/Experience'
-import { IdeaScene } from './components/canvas/IdeaScene'
+import { Atmosphere } from './components/Atmosphere'
+import { Landing } from './components/Landing'
+import { SessionShell } from './components/SessionShell'
+import { useSessionStore } from './store/sessionStore'
 
 export default function App() {
-  const phase = useIdeaStore((s) => s.phase)
+  const phase = useSessionStore((s) => s.phase)
+  const isLanding = phase === 'landing'
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-void">
-      <div className="absolute inset-0 z-0">
-        <IdeaScene />
-      </div>
-
-      <div
-        className="absolute inset-0 z-[1] pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse at center, transparent 0%, rgba(10,10,15,0.4) 60%, rgba(10,10,15,0.85) 100%)',
-        }}
-      />
+    <div className="relative min-h-dvh overflow-x-hidden">
+      <Atmosphere />
 
       <AnimatePresence mode="wait">
-        {phase === 'landing' ? (
+        {isLanding ? (
           <motion.div
             key="landing"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 1.05 }}
-            transition={{ duration: 0.5 }}
-            className="relative z-10 h-full"
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4 }}
+            className="relative min-h-dvh"
           >
             <Landing />
           </motion.div>
         ) : (
           <motion.div
-            key="experience"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.7 }}
-            className="relative z-10 h-full"
+            key="session"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.45 }}
+            className="relative min-h-dvh"
           >
-            <Experience />
+            <SessionShell />
           </motion.div>
         )}
       </AnimatePresence>

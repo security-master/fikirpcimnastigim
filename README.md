@@ -1,30 +1,20 @@
-# Fikir Jimnastiği 🧠✨
+# Fikir Jimnastiği
 
-**Zihninin sınırlarını aş.** İnteraktif 3D fikir evreni ve yaratıcı zeka laboratuvarı.
+**5 dakikalık yaratıcı antrenman.** Takıldığında seçenekleri seç — üç istasyonda kullanabileceğin fikirler üretilsin.
 
-## Canlı Demo
+## Canlı
 
-🌐 **https://barbie-drag-buck-readily.trycloudflare.com**
+🌐 https://barbie-drag-buck-readily.trycloudflare.com
 
-Alternatif:
-- Netlify: http://cheery-selkie-abce42.netlify.app (şifre: `My-Drop-Site`)
-- GitHub Pages (repo ayarlarından `gh-pages` branch seçilince): https://security-master.github.io/fikirpcimnastigim/
+## Nasıl çalışır?
 
-## Özellikler
+1. **Antrenman seç** — Kıvılcım, İçerik, Tıkanıklık Açıcı veya Fikir Tornası  
+2. **Isın** — 4 seçimle zihnini aç  
+3. **Çarpıştır** — iki kavramı birleştir  
+4. **Şekil ver** — fikri bük ve güçlendir  
+5. **Özet** — kopyala veya `.txt` indir  
 
-- **🌌 Fikir Nebulası** — Fikirlerini yaz, 3D evrende parlayan yıldızlara dönüşsünler
-- **⚡ Sinaptik Fırtına** — İki kavramı çarpıştır, beklenmedik fikirler doğsun
-- **🏋️ Zihin Esnekliği** — 60 saniyelik yaratıcı sprint meydan okuması
-- **🔮 Perspektif Portalı** — Aynı fikri 6 farklı gözle gör (sanatçı, mühendis, çocuk...)
-- **🔄 SCAMPER** — 7 kanıtlanmış yaratıcı düşünme tekniği
-
-## Teknoloji
-
-- React 19 + TypeScript + Vite
-- Three.js / React Three Fiber — 3D grafikler
-- Framer Motion — animasyonlar
-- Tailwind CSS v4 — stil
-- Web Audio API — interaktif ses efektleri
+Yazmana gerek yok. Her şey seçeneklerle ilerler.
 
 ## Geliştirme
 
@@ -41,4 +31,4 @@ npm run build
 
 ---
 
-*Fikirlerin evrende yankı bulsun.* 🚀
+React · Vite · Tailwind · Framer Motion
