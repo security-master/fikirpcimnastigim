@@ -64,8 +64,8 @@ export function FlexPanel() {
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="font-display text-lg font-semibold text-white">🏋️ Zihin Esnekliği</h3>
-        <p className="text-sm text-white/50">45 saniyede seçenekleri yakala</p>
+        <h3 className="font-display text-lg font-semibold text-white">🔥 Isınma</h3>
+        <p className="text-sm text-white/50">45 sn · seçeneklere tıkla, zihnini aç</p>
       </div>
 
       {!running && timeLeft === DURATION && (

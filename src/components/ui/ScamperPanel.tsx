@@ -30,8 +30,8 @@ export function ScamperPanel() {
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="font-display text-lg font-semibold text-white">🔄 SCAMPER</h3>
-        <p className="text-sm text-white/50">Fikir seç → teknik seç → seçeneklerden cevapla</p>
+        <h3 className="font-display text-lg font-semibold text-white">🔧 Fikri Geliştir</h3>
+        <p className="text-sm text-white/50">Var olan bir fikri 7 teknikle büyüt ve dönüştür</p>
       </div>
 
       <div className="space-y-2">

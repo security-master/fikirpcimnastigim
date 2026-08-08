@@ -6,7 +6,6 @@ import { IdeaScene } from './components/canvas/IdeaScene'
 
 export default function App() {
   const phase = useIdeaStore((s) => s.phase)
-  const setPhase = useIdeaStore((s) => s.setPhase)
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-void">
@@ -27,18 +26,18 @@ export default function App() {
             key="landing"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 1.1 }}
-            transition={{ duration: 0.6 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ duration: 0.5 }}
             className="relative z-10 h-full"
           >
-            <Landing onStart={() => setPhase('experience')} />
+            <Landing />
           </motion.div>
         ) : (
           <motion.div
             key="experience"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.7 }}
             className="relative z-10 h-full"
           >
             <Experience />

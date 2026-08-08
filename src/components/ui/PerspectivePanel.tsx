@@ -24,8 +24,8 @@ export function PerspectivePanel() {
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="font-display text-lg font-semibold text-white">🔮 Perspektif Portalı</h3>
-        <p className="text-sm text-white/50">Fikir seç → bakış açısı seç → sonuç gör</p>
+        <h3 className="font-display text-lg font-semibold text-white">👁️ Bakış Açıları</h3>
+        <p className="text-sm text-white/50">Aynı fikri sanatçı, yatırımcı, çocuk… gözüyle test et</p>
       </div>
 
       <div className="space-y-2">

@@ -28,6 +28,7 @@ export function NebulaPanel() {
   const selectedId = useIdeaStore((s) => s.selectedId)
   const selected = ideas.find((i) => i.id === selectedId)
   const removeIdea = useIdeaStore((s) => s.removeIdea)
+  const setActivePanel = useIdeaStore((s) => s.setActivePanel)
 
   const stepIndex = STEPS.indexOf(step)
 
@@ -59,11 +60,16 @@ export function NebulaPanel() {
     playAddIdea()
   }
 
+  const saveAndOpenNotebook = () => {
+    save()
+    setActivePanel('notebook')
+  }
+
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="font-display text-lg font-semibold text-white">Fikir Nebulası</h3>
-        <p className="text-sm text-white/50">Seçenekleri seç — fikir kendiliğinden doğsun</p>
+        <h3 className="font-display text-lg font-semibold text-white">💡 Fikir Üret</h3>
+        <p className="text-sm text-white/50">4 seçim yap → kullanabileceğin bir fikir çıksın</p>
       </div>
 
       <div className="flex gap-1.5">
@@ -179,15 +185,21 @@ export function NebulaPanel() {
             <div className="flex gap-2">
               <motion.button
                 whileTap={{ scale: 0.97 }}
-                onClick={save}
+                onClick={saveAndOpenNotebook}
                 className="flex-1 rounded-xl py-3 text-sm font-semibold text-void"
                 style={{ background: 'linear-gradient(135deg, #00f5ff, #bf00ff)' }}
               >
-                Evrene Ekle
+                Deftere kaydet
               </motion.button>
               <button
+                onClick={save}
+                className="rounded-xl px-3 py-3 text-xs text-white/60 glass hover:text-white"
+              >
+                Ekle
+              </button>
+              <button
                 onClick={reset}
-                className="rounded-xl px-4 py-3 text-sm text-white/60 glass hover:text-white"
+                className="rounded-xl px-3 py-3 text-xs text-white/60 glass hover:text-white"
               >
                 Yeniden
               </button>

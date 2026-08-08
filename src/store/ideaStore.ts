@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { v4 as uuid } from 'uuid'
+import { getGoal } from '../data/goals'
 
 export interface Idea {
   id: string
@@ -8,29 +9,37 @@ export interface Idea {
   position: [number, number, number]
   createdAt: number
   tags?: string[]
+  starred?: boolean
 }
 
-export type Panel = 'nebula' | 'storm' | 'flex' | 'perspective' | 'scamper'
+export type Panel = 'nebula' | 'storm' | 'flex' | 'perspective' | 'scamper' | 'notebook'
 
 interface IdeaStore {
   ideas: Idea[]
   selectedId: string | null
   phase: 'landing' | 'experience'
   activePanel: Panel
+  goalId: string | null
+  showGuide: boolean
   stormResult: string | null
   flexScore: number
   flexActive: boolean
+  copiedToast: string | null
 
   setPhase: (phase: 'landing' | 'experience') => void
   setActivePanel: (panel: Panel) => void
+  setGoal: (goalId: string) => void
+  dismissGuide: () => void
   addIdea: (text: string, tags?: string[]) => void
   removeIdea: (id: string) => void
   selectIdea: (id: string | null) => void
+  toggleStar: (id: string) => void
   setStormResult: (result: string | null) => void
   setFlexActive: (active: boolean) => void
   incrementFlexScore: () => void
   resetFlexScore: () => void
   clearAll: () => void
+  setCopiedToast: (msg: string | null) => void
 }
 
 const COLORS = [
@@ -54,13 +63,27 @@ export const useIdeaStore = create<IdeaStore>((set, get) => ({
   selectedId: null,
   phase: 'landing',
   activePanel: 'nebula',
+  goalId: null,
+  showGuide: true,
   stormResult: null,
   flexScore: 0,
   flexActive: false,
+  copiedToast: null,
 
   setPhase: (phase) => set({ phase }),
   setActivePanel: (panel) => set({ activePanel: panel }),
-  
+
+  setGoal: (goalId) => {
+    const goal = getGoal(goalId)
+    set({
+      goalId,
+      activePanel: goal?.recommendedPanel ?? 'nebula',
+      showGuide: true,
+    })
+  },
+
+  dismissGuide: () => set({ showGuide: false }),
+
   addIdea: (text, tags) => {
     const idea: Idea = {
       id: uuid(),
@@ -69,6 +92,7 @@ export const useIdeaStore = create<IdeaStore>((set, get) => ({
       position: randomPosition(),
       createdAt: Date.now(),
       tags,
+      starred: false,
     }
     set({ ideas: [...get().ideas, idea], selectedId: idea.id })
   },
@@ -79,9 +103,17 @@ export const useIdeaStore = create<IdeaStore>((set, get) => ({
   }),
 
   selectIdea: (id) => set({ selectedId: id }),
+
+  toggleStar: (id) => set({
+    ideas: get().ideas.map((i) =>
+      i.id === id ? { ...i, starred: !i.starred } : i,
+    ),
+  }),
+
   setStormResult: (result) => set({ stormResult: result }),
   setFlexActive: (active) => set({ flexActive: active }),
   incrementFlexScore: () => set({ flexScore: get().flexScore + 1 }),
   resetFlexScore: () => set({ flexScore: 0 }),
   clearAll: () => set({ ideas: [], selectedId: null, stormResult: null }),
+  setCopiedToast: (msg) => set({ copiedToast: msg }),
 }))

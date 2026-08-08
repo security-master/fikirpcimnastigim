@@ -43,8 +43,8 @@ export function StormPanel() {
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h3 className="font-display text-lg font-semibold text-white">⚡ Sinaptik Fırtına</h3>
-          <p className="text-sm text-white/50">İki kavram seç, çarpıştır</p>
+          <h3 className="font-display text-lg font-semibold text-white">⚡ Çarpıştır</h3>
+          <p className="text-sm text-white/50">İki kavram seç → beklenmedik bir fikir doğsun</p>
         </div>
         <button onClick={reshuffle} className="text-xs text-white/40 hover:text-neon-cyan transition-colors">
           Yenile
@@ -131,7 +131,7 @@ export function StormPanel() {
                 onClick={() => addIdea(result, ['storm'])}
                 className="text-xs text-neon-cyan hover:underline"
               >
-                → Evrene kaydet
+                → Deftere kaydet
               </button>
               <button
                 onClick={() => {
